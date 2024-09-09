@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <div id="chat-container" class="flex-grow flex flex-col max-w-3xl mx-auto p-4 space-y-4">
+        <h1 class="text-2xl font-bold text-center mb-4">OpenAI Chat</h1>
+        <div id="chat-messages" class="flex-grow overflow-y-auto space-y-4 p-4 bg-white rounded shadow"></div>
+        <div class="flex space-x-2">
+            <textarea id="user-input" class="flex-grow p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="Enter your message..." rows="3" aria-label="Enter your message"></textarea>
+            <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300" aria-label="Send message">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let threadId = null;
+
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            userInput.value = '';
+
+            appendMessage('You', message);
+
+            try {
+                const response = await axios.post('/chat', { message, thread_id: threadId });
+                const assistantReply = response.data.response;
+                threadId = response.data.thread_id;
+
+                appendMessage('Assistant', assistantReply, true);
+            } catch (error) {
+                console.error('Error:', error);
+                appendMessage('System', 'An error occurred. Please try again.', false, true);
+            }
+        }
+
+        function appendMessage(sender, content, isMarkdown = false, isError = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `p-3 rounded ${sender === 'You' ? 'bg-blue-100' : isError ? 'bg-red-100' : 'bg-green-100'}`;
+            
+            const senderSpan = document.createElement('span');
+            senderSpan.className = 'font-bold';
+            senderSpan.textContent = `${sender}: `;
+            messageDiv.appendChild(senderSpan);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'mt-1';
+            contentDiv.innerHTML = isMarkdown ? marked.parse(content) : content;
+            messageDiv.appendChild(contentDiv);
+
+            document.getElementById('chat-messages').appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('user-input').addEventListener('keydown', function(e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
