@@ -13,8 +13,10 @@ load_dotenv()
 client = OpenAI()
 SCOPES = [
     'https://www.googleapis.com/auth/presentations',
-    'https://www.googleapis.com/auth/drive'
 ]
+
+# This is the text that will be replaced in the Google Slide
+PLACEHOLDER_TEXT = '<TK>'
 
 app = Flask(__name__)
 
@@ -35,7 +37,32 @@ def get_google_creds():
     return creds
 
 
-def push_to_google_slide(new_text, new_file=False):
+def push_to_google_slide(new_text):
+    """
+    The tool that takes the placeholder text and replaces it with new text.
+
+    In order for this to work, you'll need to create a function in your OpenAI assistants playground.
+    Here's a sample function that should work:
+
+        {
+            "name": "push_to_google_slide",
+            "description": "Take the data from the report and put it into a Google Slide.",
+            "strict": true,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "new_text": {
+                        "type": "string",
+                        "description": "The new text to insert in the Google Slide."
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "new_text"
+                ]
+            }
+        }
+    """
     creds = get_google_creds()
     service = build('slides', 'v1', credentials=creds)
     requests =[
@@ -44,7 +71,7 @@ def push_to_google_slide(new_text, new_file=False):
                 'replaceText': new_text,
                 #'pageObjectIds': [''],
                 'containsText': {
-                    'text': '<TK>',
+                    'text': PLACEHOLDER_TEXT,
                     'matchCase': True
                 }
             }
