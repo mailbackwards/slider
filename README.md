@@ -2,6 +2,12 @@
 
 This is a simple chat interface built using Flask and the OpenAI API that adds a custom tool called `push_to_google_slide`. This tool allows the chatbot to automatically replace placeholder text (e.g., `<TK>`) in a Google Slide presentation with the information that the user requests through the chat interface.
 
+## Demo
+
+Click below for a video demonstrating how it works:
+
+[![Demo Video](https://img.youtube.com/vi/bvlLBR5vNqo/0.jpg)](https://youtu.be/bvlLBR5vNqo)
+
 ## Features
 
 - **OpenAI Chatbot Integration**: A simple conversational agent powered by OpenAI that responds to user input.
